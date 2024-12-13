@@ -5,3 +5,4 @@ Which Python version was used? For now we work with 3.9
 Create table in validation (with the different measures) to get the optimal alpha and then use the test/validation data to create the results. In the paper it is not stated explicitly. Verify with test that this was the approach taken. 
 Beta value for decay (is it actually important, because there is no clear information in the paper)
 See if the code is actually doing (debugging, ...) 
+Which OS did thes use? 
