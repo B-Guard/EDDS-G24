@@ -1,0 +1,7 @@
+Only one statistical test (Kruskal Walis)
+For the splits, they are ordered chronologically, maybe try different combination (70-10-20, maybe try 60-15-25  etc.) 
+Pre-processing for the split
+Which Python version was used? For now we work with 3.9
+Create table in validation (with the different measures) to get the optimal alpha and then use the test/validation data to create the results. In the paper it is not stated explicitly. Verify with test that this was the approach taken. 
+Beta value for decay (is it actually important, because there is no clear information in the paper)
+See if the code is actually doing (debugging, ...) 
