@@ -1,0 +1,3 @@
+[submodule "explanation-quality-recsys"]
+	path = explanation-quality-recsys
+	url = https://github.com/giacoballoccu/explanation-quality-recsys.git
