@@ -1,6 +1,6 @@
 [submodule "explanation-quality-recsys"]
 	path = explanation-quality-recsys
-	url = https://github.com/giacoballoccu/explanation-quality-recsys.git
+	url = https://github.com/B-Guard/explanation-quality-recsys.git
 [submodule "Knowlede-Aware-Recommender-Systems-Baselines"]
 	path = Knowlede-Aware-Recommender-Systems-Baselines
 	url = https://github.com/giacoballoccu/Knowlede-Aware-Recommender-Systems-Baselines.git
