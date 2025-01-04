@@ -5,6 +5,8 @@ import pandas as pd
 import sqlite3
 import argparse
 import matplotlib.pyplot as plt
+from matplotlib.colors import TwoSlopeNorm
+import seaborn as sns
 
 RESULTS_DIR = "data"
 
@@ -76,20 +78,60 @@ def percentual_change(df: pd.DataFrame, opt: str):
     return percentual_change, df
 
 
-def plot_heatmap(df: pd.DataFrame):
+def plot_heatmap(df: pd.DataFrame, lower: float, upper: float, title: str = "", show_cbar: bool = True):
     # Transform the dataframe into a table, where the columns are given by
-    # alpha, the rows are given by metric.
-    df = df.pivot(index="metric", columns="alpha", values="data")
+    # alpha, the rows are given by opt.
+    df = df.pivot(index="opt", columns="alpha", values="percentage_increase")
+
+    # Create a custom colormap
+    cmap = plt.get_cmap("PiYG")
+    norm = TwoSlopeNorm(
+        vmin=-max(upper, abs(lower)),
+        vcenter=0,
+        vmax=max(upper, abs(lower)),
+    )
+
+    row_names_map = {"SEPopt": "P-PGPR", "LIRopt": "R-PGPR", "ETDopt": "D-PGPR"}
+
+    # Rename row labels according to the mapping
+    df.rename(index=row_names_map, inplace=True)
+
+    # Reorder rows to be R-P-D
+    df = df.reindex(["R-PGPR", "P-PGPR", "D-PGPR"])
 
     # Plot heatmap
-    plt.imshow(df, cmap="coolwarm", aspect="auto")
-    plt.colorbar(label="Data")
-    plt.xticks(range(len(df.columns)), df.columns, rotation=45)
-    plt.yticks(range(len(df.index)), df.index)
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(
+        df,
+        cmap=cmap,
+        norm=norm,
+        annot=True,
+        fmt=".1f",
+        cbar=show_cbar,
+        cbar_kws={
+            "label": "Percentage Increase",
+            "location": "bottom",
+            "shrink": 0.8,
+        } if show_cbar else None,
+        square=True,
+        annot_kws={"size": 14},
+    )
     plt.xlabel("Alpha")
-    plt.ylabel("Metric")
-    plt.title("Heatmap of Metrics by Alpha")
+    plt.ylabel("")  # Remove Y axis label
+    plt.title(title)
+    plt.yticks(rotation=0)  # Make row labels horizontal
+    plt.tight_layout()  # Adjust layout to make room for labels
     plt.show()
+
+
+def filter4plot(df: pd.DataFrame, metric: str) -> pd.DataFrame:
+    # Translate the SQL query to pandas
+    filtered_df = df[
+        (df["group"] == "Overall")
+        & (df["opt"].isin(["LIRopt", "SEPopt", "ETDopt"]))
+        & (df["metric"] == metric)
+    ]
+    return filtered_df[["alpha", "percentage_increase", "opt"]]
 
 
 if __name__ == "__main__":
@@ -123,4 +165,13 @@ if __name__ == "__main__":
     # plot_heatmap(df)
     print(df.head(20))
 
-    save_to_sqlite(df, "results.db", args.subdir.replace("/", "_"))
+    # save_to_sqlite(df, "results.db", args.subdir.replace("/", "_"))
+
+    for metric in ["ndcg", "LIR", "SEP", "ETD"]:
+        plot_heatmap(
+            filter4plot(df, metric),
+            -21,  #
+            224,  #
+            title=f"{metric.upper()} {args.subdir.split('/')[0].upper()}",
+            show_cbar=True if metric == "ETD" else False,
+        )
