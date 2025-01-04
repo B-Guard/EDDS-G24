@@ -149,11 +149,10 @@ if __name__ == "__main__":
     df = clean_results(merge_results(dataframes))
 
     # Save merged results to a CSV file
-    df.to_csv(f"{args.subdir.replace('/', '_')}.csv", index=False)
 
     # Print unique opt
     print(df["opt"].unique())
-    
+
     pc_lir, df = percentual_change(df, "LIRopt")
     pc_sep, df = percentual_change(df, "SEPopt")
     pc_etd, df = percentual_change(df, "ETDopt")
@@ -162,8 +161,11 @@ if __name__ == "__main__":
     pc_es, df = percentual_change(df, "ETD_SEP_opt")
     pc_sl, df = percentual_change(df, "SEP_LIR_opt")
 
-    # plot_heatmap(df)
+    df.to_csv(f"{args.subdir.replace('/', '_')}.csv", index=False)
+
     print(df.head(20))
+    print()
+    print(filter4plot(df, "ndcg"))
 
     # save_to_sqlite(df, "results.db", args.subdir.replace("/", "_"))
 
