@@ -78,7 +78,15 @@ def percentual_change(df: pd.DataFrame, opt: str):
     return percentual_change, df
 
 
-def plot_heatmap(df: pd.DataFrame, lower: float, upper: float, title: str = "", show_cbar: bool = True):
+def plot_heatmap(
+    df: pd.DataFrame,
+    lower: float,
+    upper: float,
+    title: str = "",
+    show_cbar: bool = True,
+    show: bool = False,
+):
+    filename = '_'.join(reversed(title.split(" "))).lower()
     # Transform the dataframe into a table, where the columns are given by
     # alpha, the rows are given by opt.
     df = df.pivot(index="opt", columns="alpha", values="percentage_increase")
@@ -112,16 +120,20 @@ def plot_heatmap(df: pd.DataFrame, lower: float, upper: float, title: str = "", 
             "label": "Percentage Increase",
             "location": "bottom",
             "shrink": 0.8,
-        } if show_cbar else None,
+        }
+        if show_cbar
+        else None,
         square=True,
-        annot_kws={"size": 14},
+        annot_kws={"size": 24},
     )
     plt.xlabel("Alpha")
     plt.ylabel("")  # Remove Y axis label
     plt.title(title)
     plt.yticks(rotation=0)  # Make row labels horizontal
     plt.tight_layout()  # Adjust layout to make room for labels
-    plt.show()
+    plt.savefig(
+        f"data/img/{filename}.png"
+    ) if not show else plt.show()
 
 
 def filter4plot(df: pd.DataFrame, metric: str) -> pd.DataFrame:
