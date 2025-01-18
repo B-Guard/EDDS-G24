@@ -86,7 +86,7 @@ def plot_heatmap(
     show_cbar: bool = True,
     show: bool = False,
 ):
-    filename = '_'.join(reversed(title.split(" "))).lower()
+    filename = "_".join(reversed(title.split(" "))).lower()
     # Transform the dataframe into a table, where the columns are given by
     # alpha, the rows are given by opt.
     df = df.pivot(index="opt", columns="alpha", values="percentage_increase")
@@ -119,20 +119,23 @@ def plot_heatmap(
         cbar_kws={
             "label": "Percentage Increase",
             "location": "bottom",
-            "shrink": 0.8,
+            "shrink": 0.95,
         }
         if show_cbar
         else None,
         square=True,
         annot_kws={"size": 24},
     )
-    plt.xlabel("Alpha")
+    plt.xlabel("Alpha", fontsize=16) if show_cbar else plt.xlabel("")
     plt.ylabel("")  # Remove Y axis label
-    plt.title(title)
-    plt.yticks(rotation=0)  # Make row labels horizontal
-    plt.tight_layout()  # Adjust layout to make room for labels
+    plt.title(title, fontsize=24)
+    plt.xticks(fontsize=16) if show_cbar else plt.xticks(ticks=[])
+    plt.yticks(
+        rotation=0, fontsize=16
+    )  # Make row labels horizontal and increase font size
+    plt.tight_layout()
     plt.savefig(
-        f"data/img/{filename}.png"
+        f"{os.path.join('data', 'img', filename)}.png"
     ) if not show else plt.show()
 
 
@@ -147,9 +150,7 @@ def filter4plot(df: pd.DataFrame, metric: str) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Merge CSV results and save to SQLite database."
-    )
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "-subdir",
         type=str,
