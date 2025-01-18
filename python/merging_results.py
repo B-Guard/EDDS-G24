@@ -7,6 +7,7 @@ import argparse
 import matplotlib.pyplot as plt
 from matplotlib.colors import TwoSlopeNorm
 import seaborn as sns
+from PIL import Image
 
 RESULTS_DIR = "data"
 
@@ -139,6 +140,25 @@ def plot_heatmap(
     ) if not show else plt.show()
 
 
+def concatenate_images(image_files, output_path):
+    """
+    Stacks images vertically and saves the result
+    """
+    images: list[Image.Image] = [Image.open(img) for img in image_files]
+    widths, heights = zip(*(img.size for img in images))
+
+    total_height = sum(heights)
+    max_width = max(widths)
+
+    concatenated_image = Image.new("RGB", (max_width, total_height))
+
+    y_offset = 0
+    for img in images:
+        concatenated_image.paste(img, (0, y_offset))
+        y_offset += img.height
+
+    concatenated_image.save(output_path)
+
 def filter4plot(df: pd.DataFrame, metric: str) -> pd.DataFrame:
     # Translate the SQL query to pandas
     filtered_df = df[
@@ -182,11 +202,25 @@ if __name__ == "__main__":
 
     # save_to_sqlite(df, "results.db", args.subdir.replace("/", "_"))
 
-    for metric in ["ndcg", "LIR", "SEP", "ETD"]:
+    image_files = []
+    metrics = ["ndcg", "LIR", "SEP", "ETD"]
+
+    for metric in metrics:
+        title = f"{metric.upper()} {args.subdir.split('/')[0].upper()}"
         plot_heatmap(
             filter4plot(df, metric),
             -21,  #
             224,  #
-            title=f"{metric.upper()} {args.subdir.split('/')[0].upper()}",
+            title=title,
             show_cbar=True if metric == "ETD" else False,
+            # show=True,
         )
+        image_files.append(
+            os.path.join("data", "img", "_".join(reversed(title.split(" "))).lower())
+            + ".png"
+        )
+
+    concatenate_images(
+        image_files,
+        f"{os.path.join('data', 'img', args.subdir.replace('/', '_').lower())}.png",
+    )
