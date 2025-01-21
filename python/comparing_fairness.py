@@ -4,8 +4,6 @@ import pandas as pd
 import sqlite3
 import argparse
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
-import seaborn as sns
 
 
 def read_sqlite_subset(
@@ -36,14 +34,8 @@ def read_sqlite_subset(
     return df
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--db_name", type=str, required=True)
-    parser.add_argument("--table_name", type=str, required=True)
-    parser.add_argument("--alpha", type=float, default=0.1)
-    args = parser.parse_args()
-
-    df = read_sqlite_subset(args.db_name, args.table_name, args.alpha)
+def plot_table(db_name: str, table_name: str, alpha: float):
+    df = read_sqlite_subset(db_name, table_name, alpha)
 
     df = df.pivot(index="opt", columns="metric", values="data_difference")
 
@@ -103,6 +95,39 @@ if __name__ == "__main__":
     table.auto_set_font_size(False)
     table.set_fontsize(14)
     table.scale(1.2, 1.2)
-    plt.title(f"{args.table_name}, α={args.alpha}")
+    plt.title(f"{table_name}, α={alpha}")
     plt.tight_layout()
-    plt.show()
+    output_dir = os.path.join("data", "img", "fairness")
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+    plt.savefig(os.path.join(output_dir, f"{table_name}_a{str(alpha)[-1]}.png"))
+    # plt.show()
+    return df
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--db_name", type=str, required=True)
+    parser.add_argument("--table_name", type=str)
+    parser.add_argument("--alpha", type=float)
+    args = parser.parse_args()
+
+    tables = []
+    if args.table_name is not None:
+        if args.alpha is not None:
+            plot_table(args.db_name, args.table_name, args.alpha)
+        else:
+            for alpha in [0.1, 0.2, 0.3, 0.4, 0.5]:
+                tables.append(plot_table(args.db_name, args.table_name, alpha))
+    else:
+        for tab_name in [
+            "lastfm_10-12-1",
+            "lastfm_25-50-1",
+            "ml1m_10-12-1",
+            "ml1m_25-50-1",
+        ]:
+            for alpha in [0.1, 0.2, 0.3, 0.4, 0.5]:
+                plot_table(args.db_name, tab_name, alpha)
+
+    if len(tables) > 0:
+        pass
