@@ -135,6 +135,7 @@ def plot_heatmap(
         rotation=0, fontsize=16
     )  # Make row labels horizontal and increase font size
     plt.tight_layout()
+    os.makedirs(os.path.join('data', 'img'), exist_ok=True)
     plt.savefig(
         f"{os.path.join('data', 'img', filename)}.png"
     ) if not show else plt.show()
